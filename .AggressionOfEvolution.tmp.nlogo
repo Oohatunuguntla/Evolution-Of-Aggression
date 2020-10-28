@@ -1,3 +1,12 @@
+; global varaibles
+;; CURRENT_ITERATION
+;; current-iteration = 0 => new day,
+;; current-iteration = 1 => pigs select food,
+;; current-iteration = 2 => pigs eat food via sharing or fighting in case of conflict
+;; current-iteration = 3 => get back home and reproduce
+globals [ CURRENT-ITERATION ]
+
+
 ; breed for pigs
 breed [ pigs pig ]
 pigs-own [ energy ]
@@ -6,52 +15,162 @@ pigs-own [ energy ]
 breed [ foods food ]
 foods-own [ pig1 pig2 ]
 
+;; sets up the environment for testing
 to setup
   clear-all
   setup-defaults
   setup-patches
   setup-foods
   setup-pigs
+  reset-pigs-positions
+  reset-foods
   reset-ticks
 end
 
+;; sets up the default values in environment
 to setup-defaults
   ; default values for food
   set-default-shape foods "bug"
 
   ; default values for pigs
   set-default-shape pigs "pig"
+
+  ; reset the current iteration value
+  set CURRENT-ITERATION 0
 end
 
-to setup-foods
-  ; let ring-size 1
-  ; let offsetx 0 ;; the amount of offset the agent should spawn away from center in x axis
-  ; let offsety 0 ;; the amount of offset the agent should spawn away from center in y axis
-  create-foods initial-food-quantity [
-    setxy random-xcor random-ycor
-    set heading 0
-    set color red
-    set size 0.5
-  ]
-end
-
-to setup-pigs
-  create-pigs initial-pigs-population [
-    setxy
-    set color pink
-    set size 1.5
-  ]
-end
-
+;; sets the patches their color
 to setup-patches
   ask patches [
     set pcolor green
   ]
 end
 
-to go
+;; setups the food agents in the environment
+to setup-foods
+  ; let ring-size 1
+  ; let offsetx 0 ;; the amount of offset the agent should spawn away from center in x axis
+  ; let offsety 0 ;; the amount of offset the agent should spawn away from center in y axis
+  create-foods initial-food-quantity [
+    ; sets the positions one below the max offset from the center
+    setxy (random-float max-pxcor - 2) * (random-one-or-minus-one)
+          (random-float max-pycor - 2) * (random-one-or-minus-one)
+    set heading 0
+    set color red
+    set size 0.75
+  ]
+end
 
-  tick
+;; setups the pigs with initial population and intial energy
+to setup-pigs
+  create-pigs initial-pigs-population [
+    set color pink
+    set size 1.75
+    set energy pigs-initial-energy
+  ]
+end
+
+;; reset the position of pigs to a side of the viewport
+to reset-pigs-positions
+  let offset (max-pxcor * 2) / count pigs
+  let currOffset max-pycor
+  ask pigs [
+    ; form a circle around the cornor of the viewport
+    setxy -1 * (max-pxcor - 1) currOffset
+    set heading 90
+    set currOffset currOffset - offset
+  ]
+end
+
+;; resets the pigs linked to foods by giveing value of -1
+to reset-foods
+  ask foods [
+    set pig1 -1
+    set pig2 -1
+  ]
+end
+
+to go
+  ;; current-iteration = 0 => new day,
+  if CURRENT-ITERATION = 0 [
+    reset-foods
+  ]
+
+  ;; current-iteration = 1 => pigs select food,
+  if CURRENT-ITERATION = 1 [
+    select-foods
+  ]
+
+  ;; current-iteration = 2 => pigs eat food via sharing or fighting in case of conflict
+  if CURRENT-ITERATION = 2 [
+    move-to-food
+  ]
+
+  ;; current-iteration = 3 => get back home and reproduce and end the day
+  if CURRENT-ITERATION = 3 [
+    reset-pigs-positions
+    ; day is complete
+    tick
+  ]
+
+  increment-current-iteration
+end
+
+;; pigs select foods
+to select-foods
+  ask pigs [
+    let foodPlace one-of foods with [ pig1 = -1 or pig2 = -1 ]
+    ifelse (foodPlace != nobody) [  ; found a food with vacant place
+      ask foodPlace [
+        ifelse pig1 = -1 [
+          set pig1 [who] of myself
+        ] [
+          set pig2 [who] of myself
+        ]
+      ]
+    ] [
+      stop ;; stop if no food is available to share
+    ]
+  ]
+end
+
+;; increments the current time and checks if day is complete
+to increment-current-iteration
+  set CURRENT-ITERATION CURRENT-ITERATION + 1 ;; increment the current iterator
+  if CURRENT-ITERATION = 4 [ set CURRENT-ITERATION 0 ] ;; check if it is end of day and reset the iteration
+end
+
+
+to move-to-food
+  ask foods [
+    if pig1 != -1 [
+      move-to-place pig1 xcor ycor -0.75
+    ]
+    if pig2 != -1 [
+      move-to-place pig2 xcor ycor 0.75
+    ]
+  ]
+end
+
+;;; UTILITY FUNCTIONS
+to-report random-one-or-minus-one
+  ifelse random 2 = 0 [
+    report 1
+  ] [
+    report -1
+  ]
+end
+
+;; moves the pig with pigwho to xposition, yposition with offset
+to move-to-place [pigWho xposition yposition offset]
+  ask pig pigWho [
+    setxy xposition + offset yposition
+    ifelse (offset > 0) [
+      set heading -90
+    ] [
+      set heading 90
+    ]
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -141,7 +260,7 @@ initial-pigs-population
 initial-pigs-population
 0
 100
-20.0
+61.0
 1
 1
 NIL
@@ -154,6 +273,36 @@ SLIDER
 232
 initial-food-quantity
 initial-food-quantity
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+682
+23
+872
+56
+pigs-reproduction-energy
+pigs-reproduction-energy
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+18
+246
+190
+279
+pigs-initial-energy
+pigs-initial-energy
 0
 100
 50.0
