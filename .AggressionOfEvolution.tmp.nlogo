@@ -66,19 +66,51 @@ to setup-pigs
   create-pigs initial-pigs-population [
     set color pink
     set size 1.75
-    set energy pigs-initial-energy
+    set energy 1
   ]
 end
 
 ;; reset the position of pigs to a side of the viewport
 to reset-pigs-positions
-  let offset (max-pxcor * 2) / count pigs
-  let currOffset max-pycor
+  let offset ((max-pxcor - 1) * 8) / count pigs
+  let currOffsetY max-pycor - 1
+  let currOffsetX -1 * (max-pxcor - 1)
+  let state 0 ;; 0 => leftside, 1 => downside, 2 => rightside, 3 => upside
   ask pigs [
     ; form a circle around the cornor of the viewport
-    setxy -1 * (max-pxcor - 1) currOffset
-    set heading 90
-    set currOffset currOffset - offset
+    setxy currOffsetX currOffsetY
+    if (state = 0) [
+      set heading 90
+      set currOffsetY currOffsetY - offset
+
+      ;; check if offset value overthrows boundaries
+      if (currOffsetY <= -1 * (max-pycor - 1)) [
+
+        set state 1
+      ]
+    ]
+    if (state = 1) [
+      set heading 0
+      set currOffsetX currOffsetX + offset
+
+      ;; check if offset value overthrows boundaries
+      if (currOffsetX >= (max-pxcor - 1)) [
+        set state 2
+      ]
+    ]
+    if (state = 2) [
+      set heading -90
+      set currOffsetY currOffsetY + offset
+
+      ;; check if offset value overthrows boundaries
+      if (currOffsetY >= (max-pycor - 1)) [
+        set state 3
+      ]
+    ]
+    if (state = 3) [
+      set heading 180
+      set currOffsetX currOffsetX - offset
+    ]
   ]
 end
 
@@ -103,12 +135,16 @@ to go
 
   ;; current-iteration = 2 => pigs eat food via sharing or fighting in case of conflict
   if CURRENT-ITERATION = 2 [
-    move-to-food
+    move-pigs-to-food
+    eat-food
   ]
 
   ;; current-iteration = 3 => get back home and reproduce and end the day
   if CURRENT-ITERATION = 3 [
     reset-pigs-positions
+    decrease-energy-for-hunt
+    check-death
+    reproduce-pigs
     ; day is complete
     tick
   ]
@@ -140,8 +176,8 @@ to increment-current-iteration
   if CURRENT-ITERATION = 4 [ set CURRENT-ITERATION 0 ] ;; check if it is end of day and reset the iteration
 end
 
-
-to move-to-food
+;; moves the pigs to food and rotates appropriatly
+to move-pigs-to-food
   ask foods [
     if pig1 != -1 [
       move-to-place pig1 xcor ycor -0.75
@@ -152,12 +188,41 @@ to move-to-food
   ]
 end
 
-;;; UTILITY FUNCTIONS
-to-report random-one-or-minus-one
-  ifelse random 2 = 0 [
-    report 1
-  ] [
-    report -1
+;; pigs eat food and gain energy
+to eat-food
+  ask foods [
+    ifelse (pig1 != -1 and pig2 != -1) [
+      ;; conflict case here and so they share
+      ask pig pig1 [ set energy energy + 1 ]
+      ask pig pig2 [ set energy energy + 1 ]
+    ] [
+      ;; only one pig or no pig on this food
+      ifelse (pig1 != -1 or pig2 != -1) [
+        ;; only one pig is on the food
+        let pigWho get-valid-who-number-of-two pig1 pig2
+        ask pig pigWho [ set energy energy + 2 ] ;; eats all the food and returns gains maximum energy
+      ] [
+        ;; no pig on this food
+      ]
+    ]
+  ]
+end
+
+;; decreases the energy of all pigs for that day
+to decrease-energy-for-hunt
+  ask pigs [ set energy energy - 1 ]
+end
+
+;; check if any pig doesn't has energy and kill them if zero energy
+to check-death
+  ask pigs with [ energy <= 0 ] [ die ]
+end
+
+;; if pig has enough energy reproduce
+to reproduce-pigs
+  ask pigs with [ energy >= 2 ] [
+    ;; has enough energy so reproduces
+    hatch 1 [ set energy 1 ]
   ]
 end
 
@@ -170,6 +235,25 @@ to move-to-place [pigWho xposition yposition offset]
     ] [
       set heading 90
     ]
+  ]
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; UTILITY FUNCTIONS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; returns -1 or 1 with probability of 0.5
+to-report random-one-or-minus-one
+  ifelse random 2 = 0 [
+    report 1
+  ] [
+    report -1
+  ]
+end
+
+;; returns a valid who number of two input whos NOTE: one of the inputs should be valid
+to-report get-valid-who-number-of-two [who1 who2]
+  ifelse (who1 = -1) [
+    report who2
+  ] [
+    report who1
   ]
 end
 @#$#@#$#@
@@ -187,8 +271,8 @@ GRAPHICS-WINDOW
 1
 1
 0
-0
-0
+1
+1
 1
 -16
 16
@@ -260,7 +344,7 @@ initial-pigs-population
 initial-pigs-population
 0
 100
-61.0
+30.0
 1
 1
 NIL
@@ -275,41 +359,22 @@ initial-food-quantity
 initial-food-quantity
 0
 100
-50.0
+60.0
 1
 1
 NIL
 HORIZONTAL
 
-SLIDER
-682
-23
-872
-56
-pigs-reproduction-energy
-pigs-reproduction-energy
+MONITOR
+724
+32
+788
+77
+pigs alive
+count pigs
 0
-100
-50.0
 1
-1
-NIL
-HORIZONTAL
-
-SLIDER
-18
-246
-190
-279
-pigs-initial-energy
-pigs-initial-energy
-0
-100
-50.0
-1
-1
-NIL
-HORIZONTAL
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
