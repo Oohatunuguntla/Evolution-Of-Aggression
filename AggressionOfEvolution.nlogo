@@ -164,10 +164,28 @@ to go
     check-death
     reproduce-pigs
     ; day is complete
-    tick
   ]
 
   increment-current-iteration
+  tick
+end
+
+to add-aggresive-pig
+  create-pigs 1 [
+    set color pink
+    set size 1.75
+    set energy 1
+    set aggression 1
+  ]
+end
+
+to add-nice-pig
+  create-pigs 1 [
+    set color pink
+    set size 1.75
+    set energy 1
+    set aggression 0
+  ]
 end
 
 ;; pigs select foods
@@ -429,10 +447,10 @@ NIL
 0
 
 SLIDER
-17
-151
-189
-184
+22
+258
+194
+291
 initial-pigs-population
 initial-pigs-population
 0
@@ -444,15 +462,15 @@ NIL
 HORIZONTAL
 
 SLIDER
-18
-199
-190
-232
+23
+306
+195
+339
 initial-food-quantity
 initial-food-quantity
 0
 10000
-5669.0
+64.0
 1
 1
 NIL
@@ -470,10 +488,10 @@ count pigs
 11
 
 SLIDER
-18
-250
-254
-283
+23
+357
+259
+390
 percentage-of-aggressive-agents
 percentage-of-aggressive-agents
 0
@@ -526,10 +544,10 @@ count pigs with [aggression = 0]
 11
 
 SLIDER
-18
-301
-190
-334
+23
+408
+195
+441
 fight-lose-cost
 fight-lose-cost
 0
@@ -539,6 +557,40 @@ fight-lose-cost
 1
 NIL
 HORIZONTAL
+
+BUTTON
+22
+122
+157
+155
+add aggressive pig
+add-aggresive-pig
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+0
+
+BUTTON
+23
+168
+120
+201
+add nice pig
+add-nice-pig
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+0
 
 @#$#@#$#@
 ## WHAT IS IT?
