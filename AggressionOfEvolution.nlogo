@@ -278,6 +278,7 @@ end
 
 ;; check if any pig doesn't has energy and kill them if zero energy
 to check-death
+  ;; kill pigs which has some energy with its ((1 - energy) * 100)% probability
   ask pigs with [ energy < 1 ] [
     ;; dies with the probability of its energy
     if ((random-float 1) > energy) [ die ]
@@ -436,7 +437,7 @@ initial-pigs-population
 initial-pigs-population
 0
 100
-1.0
+29.0
 1
 1
 NIL
@@ -450,8 +451,8 @@ SLIDER
 initial-food-quantity
 initial-food-quantity
 0
-100
-36.0
+10000
+5669.0
 1
 1
 NIL
@@ -477,7 +478,7 @@ percentage-of-aggressive-agents
 percentage-of-aggressive-agents
 0
 100
-0.0
+50.0
 1
 1
 NIL
@@ -493,17 +494,6 @@ count pigs with [aggression = 1]
 0
 1
 11
-
-INPUTBOX
-21
-297
-176
-357
-fight-lose-cost
-1.5
-1
-0
-Number
 
 PLOT
 732
@@ -534,6 +524,21 @@ count pigs with [aggression = 0]
 0
 1
 11
+
+SLIDER
+18
+301
+190
+334
+fight-lose-cost
+fight-lose-cost
+0
+1
+0.25
+0.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?

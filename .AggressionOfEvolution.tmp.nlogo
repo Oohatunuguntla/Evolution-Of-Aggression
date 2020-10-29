@@ -278,6 +278,10 @@ end
 
 ;; check if any pig doesn't has energy and kill them if zero energy
 to check-death
+  ;; kill the pigs which are doomed to die
+  ask pigs with [ energy <= 0 ] [ die ]
+
+  ;; kill pigs which has some energy with its ((1 - energy) * 100)% probability
   ask pigs with [ energy < 1 ] [
     ;; dies with the probability of its energy
     if ((random-float 1) > energy) [ die ]
@@ -451,7 +455,7 @@ initial-food-quantity
 initial-food-quantity
 0
 10000
-50.0
+5669.0
 1
 1
 NIL
@@ -500,7 +504,7 @@ INPUTBOX
 176
 357
 fight-lose-cost
-1.5
+100.0
 1
 0
 Number
