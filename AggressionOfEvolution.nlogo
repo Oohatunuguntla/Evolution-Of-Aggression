@@ -9,7 +9,7 @@ globals [ CURRENT-ITERATION ]
 
 ; breed for pigs
 breed [ pigs pig ]
-pigs-own [ energy ]
+pigs-own [ energy aggression ]
 
 ; breed for food agents
 breed [ foods food ]
@@ -53,8 +53,8 @@ to setup-foods
   ; let offsety 0 ;; the amount of offset the agent should spawn away from center in y axis
   create-foods initial-food-quantity [
     ; sets the positions one below the max offset from the center
-    setxy (random-float max-pxcor - 2) * (random-one-or-minus-one)
-          (random-float max-pycor - 2) * (random-one-or-minus-one)
+    setxy (random-float max-pxcor - 5) * (random-one-or-minus-one)
+          (random-float max-pycor - 5) * (random-one-or-minus-one)
     set heading 0
     set color red
     set size 0.75
@@ -63,10 +63,18 @@ end
 
 ;; setups the pigs with initial population and intial energy
 to setup-pigs
+  let aggressivePigsCount initial-pigs-population * percentage-of-aggressive-agents * 0.01
+  let index 0
   create-pigs initial-pigs-population [
     set color pink
     set size 1.75
     set energy 1
+    ifelse (index < aggressivePigsCount) [
+      set aggression 1
+      set index index + 1
+    ] [
+      set aggression 0
+    ]
   ]
 end
 
@@ -124,10 +132,16 @@ to reset-foods
   ]
 end
 
+;; resets the pigs energy with one
+to reset-pigs-energy
+  ask pigs [ set energy 1 ]
+end
+
 to go
   ;; current-iteration = 0 => new day,
   if CURRENT-ITERATION = 0 [
     reset-foods
+    reset-pigs-energy
   ]
 
   ;; current-iteration = 1 => pigs select food,
@@ -143,6 +157,8 @@ to go
 
   ;; current-iteration = 3 => get back home and reproduce and end the day
   if CURRENT-ITERATION = 3 [
+    ;; check if all pigs are alive
+    if (count pigs = 0) [ stop ]
     reset-pigs-positions
     decrease-energy-for-hunt
     check-death
@@ -194,9 +210,8 @@ end
 to eat-food
   ask foods [
     ifelse (pig1 != -1 and pig2 != -1) [
-      ;; conflict case here and so they share
-      ask pig pig1 [ set energy energy + 1 ]
-      ask pig pig2 [ set energy energy + 1 ]
+      ;; colfict case here
+      resolve-conflict pig1 pig2
     ] [
       ;; only one pig or no pig on this food
       ifelse (pig1 != -1 or pig2 != -1) [
@@ -210,6 +225,52 @@ to eat-food
   ]
 end
 
+;; conflict issues are resolved in this method
+to resolve-conflict [ pig1Who pig2Who ]
+  let isPig1Aggressive? isPigAggressive? pig1Who
+  let isPig2Aggressive? isPigAggressive? pig2Who
+
+  ;; if both are aggressive
+  ifelse (isPig1Aggressive? and isPig2Aggressive?) [
+    both-pigs-aggressive-conflict pig1Who pig2Who
+  ] [
+    ;; only one pig is aggressive
+    ifelse (isPig1Aggressive? or isPig2Aggressive?) [
+      ;; first pig is aggressive
+      ifelse (isPig1Aggressive?)
+      [ only-one-pig-aggressive-conflict pig1Who pig2Who ]
+      [ only-one-pig-aggressive-conflict pig2Who pig1Who ]
+    ] [
+      ;; none are aggressive
+      ;; no conflict case here and so they share
+      both-pigs-share-conflict pig1Who pig2Who
+    ]
+  ]
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ALL CASES OF CONFLICTS PROCEDURES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; both are aggressive
+to both-pigs-aggressive-conflict [ pig1Who pig2Who ]
+  ask pig pig1Who [ set energy energy + 1 - fight-lose-cost ]
+  ask pig pig2Who [ set energy energy + 1 - fight-lose-cost ]
+end
+
+;; only one pig conflict case
+to only-one-pig-aggressive-conflict [ aggressive-pig-who nice-pig-who ]
+  ask pig aggressive-pig-who [ set energy energy + 1.5 ]
+  ask pig nice-pig-who [ set energy energy + 0.5 ]
+end
+
+;; both pigs are nice pigs and share
+to both-pigs-share-conflict [ pig1Who pig2Who ]
+  ;; no conflict case here and so they share
+  ask pig pig1Who [ set energy energy + 1 ]
+  ask pig pig2Who [ set energy energy + 1 ]
+end
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; END OF ALL CASES OF CONFLICTS PROCEDURES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; decreases the energy of all pigs for that day
 to decrease-energy-for-hunt
   ask pigs [ set energy energy - 1 ]
@@ -217,14 +278,32 @@ end
 
 ;; check if any pig doesn't has energy and kill them if zero energy
 to check-death
-  ask pigs with [ energy <= 0 ] [ die ]
+  ask pigs with [ energy < 1 ] [
+    ;; dies with the probability of its energy
+    if ((random-float 1) > energy) [ die ]
+  ]
 end
 
 ;; if pig has enough energy reproduce
 to reproduce-pigs
-  ask pigs with [ energy >= 2 ] [
+  ask pigs [
     ;; has enough energy so reproduces
-    hatch 1 [ set energy 1 ]
+    ifelse (energy >= 2) [
+      reproduce
+    ] [
+      if (energy >= 1.5) [
+        ;; reporduce with 50% chance
+        if (random-float 1 < 0.5) [ reproduce ]
+      ]
+    ]
+  ]
+end
+
+to reproduce
+  hatch 1 [
+    set aggression [aggression] of myself
+    ; show [aggression] of myself
+    ; show [who] of myself
   ]
 end
 
@@ -258,12 +337,23 @@ to-report get-valid-who-number-of-two [who1 who2]
     report who1
   ]
 end
+
+;; returns true if the random-float value is within the probability of pigs aggression probability
+to-report isPigAggressive? [ pigWho ]
+  let result false
+  ask pig pigWho [
+    set result (random-float 1) < aggression
+  ]
+  report result
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; END OF UTILITY FUNCTIONS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
-10
-647
-448
+267
+11
+704
+449
 -1
 -1
 13.0
@@ -346,7 +436,7 @@ initial-pigs-population
 initial-pigs-population
 0
 100
-25.0
+1.0
 1
 1
 NIL
@@ -361,7 +451,7 @@ initial-food-quantity
 initial-food-quantity
 0
 100
-60.0
+36.0
 1
 1
 NIL
@@ -374,6 +464,73 @@ MONITOR
 77
 pigs alive
 count pigs
+0
+1
+11
+
+SLIDER
+18
+250
+254
+283
+percentage-of-aggressive-agents
+percentage-of-aggressive-agents
+0
+100
+0.0
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+811
+32
+945
+77
+Aggressive pigs count
+count pigs with [aggression = 1]
+0
+1
+11
+
+INPUTBOX
+21
+297
+176
+357
+fight-lose-cost
+1.5
+1
+0
+Number
+
+PLOT
+732
+290
+932
+440
+aggresive vs nice
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"Aggresice pigs" 1.0 0 -2674135 true "" "plot count pigs with [ aggression = 1 ]"
+"Nice pigs" 1.0 0 -13791810 true "" "plot count pigs with [ aggression = 0 ]"
+
+MONITOR
+724
+93
+820
+138
+Nice pigs count
+count pigs with [aggression = 0]
 0
 1
 11
