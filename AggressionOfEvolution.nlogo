@@ -9,7 +9,7 @@ globals [ CURRENT-ITERATION ]
 
 ; breed for pigs
 breed [ pigs pig ]
-pigs-own [ energy aggression ]
+pigs-own [ energy aggression intelligent decision-time ]
 
 ; breed for food agents
 breed [ foods food ]
@@ -66,15 +66,30 @@ to setup-pigs
   let aggressivePigsCount initial-pigs-population * percentage-of-aggressive-agents * 0.01
   let index 0
   create-pigs initial-pigs-population [
+    set intelligent -1
+    set decision-time 0
     set color pink
     set size 1.75
     set energy 1
     ifelse (index < aggressivePigsCount) [
-      set aggression 1
+      set aggression aggresive-level 1
       set index index + 1
     ] [
-      set aggression 0
+      set aggression aggresive-level 0
     ]
+  ]
+  if conditional-strategies[
+       let intelligentPigsCount initial-pigs-population * percentage-of-intelligent-agents * 0.01
+       set index 0
+       ask pigs[
+          ifelse (index < intelligentPigsCount) [
+            set intelligent 1
+            set decision-time 1 + random decision-time-range
+            set index index + 1
+          ] [
+            set intelligent 0
+          ]
+       ]
   ]
 end
 
@@ -228,8 +243,10 @@ end
 to eat-food
   ask foods [
     ifelse (pig1 != -1 and pig2 != -1) [
-      ;; colfict case here
-      resolve-conflict pig1 pig2
+      ;; conlfict case here
+      ifelse conditional-strategies
+      [resolve-conflict-conditional-strategies pig1 pig2]
+      [resolve-conflict pig1 pig2]
     ] [
       ;; only one pig or no pig on this food
       ifelse (pig1 != -1 or pig2 != -1) [
@@ -242,6 +259,29 @@ to eat-food
     ]
   ]
 end
+
+;;conflicts when conditional strategies
+to resolve-conflict-conditional-strategies [ pig1Who pig2Who ]
+  let isPig1Intelligent? isPigIntelligent? pig1Who
+  let isPig2Intelligent? isPigIntelligent? pig2Who
+  ;; if both are intelligent
+  ifelse (isPig1Intelligent? and isPig2Intelligent?) [
+    both-pigs-intelligent-conflict pig1Who pig2Who
+  ] [
+    ;; only one pig is Intelligent
+    ifelse (isPig1Intelligent? or isPig2Intelligent?) [
+      ;; first pig is Intelligent
+      ifelse (isPig1Intelligent?)
+      [ only-one-pig-intelligent-conflict pig1Who pig2Who ]
+      [ only-one-pig-intelligent-conflict pig2Who pig1Who ]
+    ] [
+      ;; none are intelligent
+      resolve-conflict pig1Who pig2Who
+    ]
+  ]
+end
+
+
 
 ;; conflict issues are resolved in this method
 to resolve-conflict [ pig1Who pig2Who ]
@@ -285,9 +325,54 @@ to both-pigs-share-conflict [ pig1Who pig2Who ]
   ask pig pig1Who [ set energy energy + 1 ]
   ask pig pig2Who [ set energy energy + 1 ]
 end
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; END OF ALL CASES OF CONFLICTS PROCEDURES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; ALL CASES OF CONDITIONAL PROCEDURES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;both are intelligent
+to both-pigs-intelligent-conflict [ pig1Who pig2Who ]
+  let pig1DecisionTime decision-time-for-pig pig1Who
+  let pig2DecisionTime decision-time-for-pig pig2Who
+  ifelse pig1DecisionTime = pig2DecisionTime
+    [resolve-conflict pig1Who pig2Who] [
+    ifelse pig1DecisionTime > pig2DecisionTime
+      [behaviour-strategy pig2Who pig1Who]
+      [behaviour-strategy pig1Who pig2Who]
+   ]
+end
+
+;;one pig intelligent
+to only-one-pig-intelligent-conflict [ pig1Who pig2Who ]
+  behaviour-strategy pig2Who pig1Who
+end
+
+;;selecting bhaviour
+to behaviour-strategy [ pig1Who pig2Who ]
+  ifelse same-behaviour
+    [same-behaviour-strategy pig1Who pig2Who ]
+    [different-behaviour-strategy pig1Who pig2Who ]
+end
+
+;;same-behaviour-strategy
+to same-behaviour-strategy [ pig1Who pig2Who ]
+   let isPig1Aggressive? isPigAggressive? pig1Who
+   let isPig2Aggressive? isPig1Aggressive?
+   ifelse isPig1Aggressive?
+     [ both-pigs-aggressive-conflict pig1Who pig2Who ]
+     [ both-pigs-share-conflict pig1Who pig2Who ]
+end
+
+;;different-behaviour-strategy
+to different-behaviour-strategy [ pig1Who pig2Who ]
+   let isPig1Aggressive? isPigAggressive? pig1Who
+   let isPig2Aggressive? not isPig1Aggressive?
+   ifelse isPig1Aggressive?
+     [ only-one-pig-aggressive-conflict pig1Who pig2Who ]
+     [ only-one-pig-aggressive-conflict pig2Who pig1Who ]
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;  END OF ALL CASES OF CONFLICTS PROCEDURE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 
 ;; decreases the energy of all pigs for that day
 to decrease-energy-for-hunt
@@ -320,7 +405,14 @@ end
 
 to reproduce
   hatch 1 [
-    set aggression [aggression] of myself
+    set aggression aggresion-level-reproduction [aggression] of myself
+    ifelse conditional-strategies [
+      set intelligent [intelligent] of myself
+      set decision-time decision-level-reproduction [decision-time] of myself
+    ] [
+      set intelligent -1
+      set decision-time 0
+    ]
     ; show [aggression] of myself
     ; show [who] of myself
   ]
@@ -366,6 +458,58 @@ to-report isPigAggressive? [ pigWho ]
   report result
 end
 
+;;returns true if pig is intelligent
+to-report isPigIntelligent? [ pigWho ]
+  let result false
+  ask pig pigWho [
+   set result intelligent = 1
+  ]
+  report result
+end
+
+;;returns decission time for pig
+to-report decision-time-for-pig [ pigWho ]
+  let result 0
+  ask pig pigWho [
+   set result decision-time
+  ]
+  report result
+end
+;;returns aggressive level for pig
+to-report aggresive-level [ flag ]
+  ifelse mixed-strategies[
+    ifelse flag = 1
+    [report 0.5 + random-float 0.5 ]
+    [report random-float 0.5 ]
+  ] [
+    ifelse flag = 1
+    [report 1 ]
+    [report 0 ]
+  ]
+end
+
+;;returns decision time of child pig after reproduction
+to-report decision-level-reproduction [decision-level]
+    set decision-level decision-level + random-one-or-minus-one
+    if (decision-level > decision-time-range ) [report decision-time-range]
+    if (decision-level < 0) [report 0]
+    report decision-level
+end
+
+;;returns aggression level for child pig after reproduction
+to-report aggresion-level-reproduction [aggresion-level]
+  ifelse mixed-strategies[
+    set aggresion-level aggresion-level * (1 + ((random-one-or-minus-one)*(change-in-heridity)/ 100))
+    if (aggresion-level > 1) [report 1]
+    if (aggresion-level < 0) [report 0]
+    report aggresion-level
+  ] [
+    report aggresion-level
+  ]
+end
+
+
+;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; END OF UTILITY FUNCTIONS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -455,7 +599,7 @@ initial-pigs-population
 initial-pigs-population
 0
 100
-29.0
+31.0
 1
 1
 NIL
@@ -470,7 +614,7 @@ initial-food-quantity
 initial-food-quantity
 0
 10000
-64.0
+1529.0
 1
 1
 NIL
@@ -508,16 +652,16 @@ MONITOR
 945
 77
 Aggressive pigs count
-count pigs with [aggression = 1]
+count pigs with [aggression > 0.5]
 0
 1
 11
 
 PLOT
-732
-290
+714
+153
 932
-440
+322
 aggresive vs nice
 NIL
 NIL
@@ -529,16 +673,16 @@ true
 false
 "" ""
 PENS
-"Aggresice pigs" 1.0 0 -2674135 true "" "plot count pigs with [ aggression = 1 ]"
-"Nice pigs" 1.0 0 -13791810 true "" "plot count pigs with [ aggression = 0 ]"
+"Aggresice pigs" 1.0 0 -2674135 true "" "plot count pigs with [ aggression > 0.5]"
+"Nice pigs" 1.0 0 -13791810 true "" "plot count pigs with [ aggression < 0.5 ]"
 
 MONITOR
-724
-93
-820
-138
+960
+29
+1056
+74
 Nice pigs count
-count pigs with [aggression = 0]
+count pigs with [aggression < 0.5]
 0
 1
 11
@@ -552,7 +696,7 @@ fight-lose-cost
 fight-lose-cost
 0
 1
-0.25
+0.75
 0.01
 1
 NIL
@@ -591,6 +735,161 @@ NIL
 NIL
 NIL
 0
+
+SWITCH
+24
+454
+174
+487
+mixed-strategies
+mixed-strategies
+1
+1
+-1000
+
+SLIDER
+23
+499
+195
+532
+change-in-heridity
+change-in-heridity
+0
+100
+25.0
+1
+1
+NIL
+HORIZONTAL
+
+SWITCH
+23
+544
+197
+577
+conditional-strategies
+conditional-strategies
+0
+1
+-1000
+
+SWITCH
+212
+544
+367
+577
+same-behaviour
+same-behaviour
+1
+1
+-1000
+
+SLIDER
+213
+500
+442
+533
+percentage-of-intelligent-agents
+percentage-of-intelligent-agents
+0
+100
+39.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+459
+501
+631
+534
+decision-time-range
+decision-time-range
+0
+10
+5.0
+1
+1
+NIL
+HORIZONTAL
+
+MONITOR
+817
+85
+945
+130
+Intelligent Pigs count
+count pigs with [ intelligent = 1 ]
+17
+1
+11
+
+MONITOR
+956
+87
+1073
+132
+Non intelligent pigs
+count pigs with [ intelligent = 0 ]
+17
+1
+11
+
+PLOT
+718
+340
+918
+490
+histogram of aggression
+NIL
+NIL
+0.0
+2.0
+0.0
+1000.0
+true
+false
+"set-histogram-num-bars 10\nset-plot-y-range 0 count pigs" ""
+PENS
+"default" 1.0 1 -16777216 true "" "histogram [ aggression ] of pigs"
+
+PLOT
+954
+338
+1154
+488
+histogram of decision-time
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"set-histogram-num-bars 10\nset-plot-x-range 0 decision-time-range + 2" ""
+PENS
+"decission-time" 1.0 1 -5298144 true "" "histogram [ decision-time ] of pigs "
+
+PLOT
+950
+153
+1150
+303
+intelligent vs non-intelligent
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"intelligent" 1.0 0 -2674135 true "" "plot count pigs with [ intelligent = 1 ]"
+"non-intelligent" 1.0 0 -13345367 true "" "plot count pigs with [ intelligent = 0 ]"
 
 @#$#@#$#@
 ## WHAT IS IT?
