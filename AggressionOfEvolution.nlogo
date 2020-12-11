@@ -499,7 +499,7 @@ end
 ;;returns aggression level for child pig after reproduction
 to-report aggresion-level-reproduction [aggresion-level]
   ifelse mixed-strategies[
-    set aggresion-level aggresion-level * (1 + ((random-one-or-minus-one)*(change-in-heridity)/ 100))
+    set aggresion-level aggresion-level * (1 + ((random-one-or-minus-one)*(random change-in-heridity)/ 100))
     if (aggresion-level > 1) [report 1]
     if (aggresion-level < 0) [report 0]
     report aggresion-level
