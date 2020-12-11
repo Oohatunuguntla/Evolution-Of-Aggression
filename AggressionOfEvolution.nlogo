@@ -9,7 +9,7 @@ globals [ CURRENT-ITERATION ]
 
 ; breed for pigs
 breed [ pigs pig ]
-pigs-own [ energy aggression intelligent decision-time ]
+pigs-own [ energy aggression intelligent decision-time behaviour]
 
 ; breed for food agents
 breed [ foods food ]
@@ -68,6 +68,7 @@ to setup-pigs
   create-pigs initial-pigs-population [
     set intelligent -1
     set decision-time 0
+    set behaviour -1
     set color pink
     set size 1.75
     set energy 1
@@ -80,10 +81,15 @@ to setup-pigs
   ]
   if conditional-strategies[
        let intelligentPigsCount initial-pigs-population * percentage-of-intelligent-agents * 0.01
+       let samebehaviourPigsCount intelligentPigsCount * percentage-of-same-behaviour-agents * 0.01
        set index 0
        ask pigs[
           ifelse (index < intelligentPigsCount) [
+            if (index < samebehaviourPigsCount) [
+              set behaviour 0
+            ]
             set intelligent 1
+            set behaviour 1
             set decision-time 1 + random decision-time-range
             set index index + 1
           ] [
@@ -348,9 +354,10 @@ end
 
 ;;selecting bhaviour
 to behaviour-strategy [ pig1Who pig2Who ]
-  ifelse same-behaviour
+  let Pigbehaviour [behaviour] of pig2who
+  ifelse (Pigbehaviour = 0)
     [same-behaviour-strategy pig1Who pig2Who ]
-    [different-behaviour-strategy pig1Who pig2Who ]
+    [different-behaviour-strategy pig1Who pig2Who]
 end
 
 ;;same-behaviour-strategy
@@ -463,6 +470,13 @@ to-report isPigIntelligent? [ pigWho ]
   let result false
   ask pig pigWho [
    set result intelligent = 1
+   if result [
+     ifelse (behaviour = 0)[
+        set result same-behaviour
+     ][
+        set result different-behaviour
+     ]
+   ]
   ]
   report result
 end
@@ -599,7 +613,7 @@ initial-pigs-population
 initial-pigs-population
 0
 100
-31.0
+38.0
 1
 1
 NIL
@@ -743,7 +757,7 @@ SWITCH
 487
 mixed-strategies
 mixed-strategies
-1
+0
 1
 -1000
 
@@ -793,7 +807,7 @@ percentage-of-intelligent-agents
 percentage-of-intelligent-agents
 0
 100
-39.0
+26.0
 1
 1
 NIL
@@ -890,6 +904,32 @@ false
 PENS
 "intelligent" 1.0 0 -2674135 true "" "plot count pigs with [ intelligent = 1 ]"
 "non-intelligent" 1.0 0 -13345367 true "" "plot count pigs with [ intelligent = 0 ]"
+
+SLIDER
+394
+543
+624
+576
+percentage-of-same-behaviour-agents
+percentage-of-same-behaviour-agents
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
+
+SWITCH
+641
+541
+805
+574
+different-behaviour
+different-behaviour
+1
+1
+-1000
 
 @#$#@#$#@
 ## WHAT IS IT?
