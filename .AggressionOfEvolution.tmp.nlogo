@@ -566,17 +566,6 @@ GRAPHICS-WINDOW
 ticks
 30.0
 
-MONITOR
-0
-0
-0
-0
-NIL
-NIL
-17
-1
-11
-
 BUTTON
 41
 67
@@ -652,7 +641,7 @@ initial-food-quantity
 initial-food-quantity
 0
 10000
-4522.0
+1911.0
 1
 1
 NIL
@@ -723,7 +712,7 @@ fight-lose-cost
 fight-lose-cost
 0
 1
-1.0
+0.75
 0.01
 1
 NIL
@@ -775,10 +764,10 @@ mixed-strategies
 -1000
 
 SLIDER
-32
-371
-204
-404
+36
+522
+208
+555
 change-in-heridity
 change-in-heridity
 0
@@ -1064,6 +1053,17 @@ MONITOR
 630
 different behaviour pig count
 count pigs with [ behaviour = 1 ]
+0
+1
+11
+
+MONITOR
+1180
+113
+1297
+158
+current generation
+ticks / 4
 0
 1
 11
