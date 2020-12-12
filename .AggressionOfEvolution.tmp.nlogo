@@ -753,10 +753,10 @@ NIL
 0
 
 SWITCH
-36
-483
-186
-516
+31
+419
+181
+452
 mixed-strategies
 mixed-strategies
 0
@@ -764,10 +764,10 @@ mixed-strategies
 -1000
 
 SLIDER
-36
-522
-208
-555
+29
+472
+201
+505
 change-in-heridity
 change-in-heridity
 0
@@ -816,10 +816,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-222
-602
-394
-635
+274
+647
+446
+680
 decision-time-range
 decision-time-range
 0
@@ -975,10 +975,10 @@ General Attributes
 1
 
 TEXTBOX
-18
-442
-260
-471
+13
+378
+255
+407
 Mixed Strategies Attributes
 20
 0.0

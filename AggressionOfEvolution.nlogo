@@ -816,10 +816,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-222
-602
-394
-635
+274
+647
+446
+680
 decision-time-range
 decision-time-range
 0
