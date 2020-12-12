@@ -80,23 +80,22 @@ to setup-pigs
     ]
   ]
   if conditional-strategies[
-    let intelligentPigsCount initial-pigs-population * percentage-of-intelligent-agents * 0.01
-    let samebehaviourPigsCount intelligentPigsCount * percentage-of-same-behaviour-agents * 0.01
-    set index 0
-    ask pigs[
-      ifelse (index < intelligentPigsCount) [
-        ifelse (index < samebehaviourPigsCount) [
-          set behaviour 0
-        ] [
-          set behaviour 1
-        ]
-        set intelligent 1
-        set decision-time 1 + random decision-time-range
-        set index index + 1
-      ] [
-        set intelligent 0
-      ]
-    ]
+       let intelligentPigsCount initial-pigs-population * percentage-of-intelligent-agents * 0.01
+       let samebehaviourPigsCount intelligentPigsCount * percentage-of-same-behaviour-agents * 0.01
+       set index 0
+       ask pigs[
+          ifelse (index < intelligentPigsCount) [
+            ife (index < samebehaviourPigsCount) [
+              set behaviour 0
+            ]
+            set intelligent 1
+            set behaviour 1
+            set decision-time 1 + random decision-time-range
+            set index index + 1
+          ] [
+            set intelligent 0
+          ]
+       ]
   ]
 end
 
