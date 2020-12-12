@@ -403,7 +403,7 @@ to check-death
   ]
 
   ;; dies of old age if age > 2
-  ;ask pigs with [ age > 2 ] [ die ]
+  ;; ask pigs with [ age > 2 ] [ die ]
 end
 
 ;; if pig has enough energy reproduce
@@ -566,6 +566,17 @@ GRAPHICS-WINDOW
 ticks
 30.0
 
+MONITOR
+0
+0
+0
+0
+NIL
+NIL
+17
+1
+11
+
 BUTTON
 41
 67
@@ -584,10 +595,10 @@ NIL
 1
 
 BUTTON
-1400
-71
-1475
-104
+1398
+83
+1473
+116
 go once
 go
 NIL
@@ -641,7 +652,7 @@ initial-food-quantity
 initial-food-quantity
 0
 10000
-1529.0
+4522.0
 1
 1
 NIL
@@ -712,17 +723,17 @@ fight-lose-cost
 fight-lose-cost
 0
 1
-0.5
+1.0
 0.01
 1
 NIL
 HORIZONTAL
 
 BUTTON
-1496
-69
-1631
-102
+1494
+81
+1629
+114
 add aggressive pig
 add-aggresive-pig
 NIL
@@ -736,10 +747,10 @@ NIL
 0
 
 BUTTON
-1400
-118
-1497
-151
+1398
+130
+1495
+163
 add nice pig
 add-nice-pig
 NIL
@@ -759,7 +770,7 @@ SWITCH
 516
 mixed-strategies
 mixed-strategies
-1
+0
 1
 -1000
 
@@ -824,7 +835,7 @@ decision-time-range
 decision-time-range
 0
 10
-5.0
+10.0
 1
 1
 NIL
@@ -861,9 +872,9 @@ histogram of aggression
 NIL
 NIL
 0.0
-2.0
+1.0
 0.0
-1000.0
+1.0
 true
 false
 "set-histogram-num-bars 10\nset-plot-y-range 0 count pigs" ""
@@ -934,10 +945,10 @@ different-behaviour
 -1000
 
 SWITCH
-1511
-116
-1642
-149
+1509
+128
+1640
+161
 debug-mode?
 debug-mode?
 1
@@ -957,9 +968,9 @@ Initialization setup
 TEXTBOX
 1391
 34
-1541
-59
-Debug Testing
+1592
+66
+Debug and Testing
 20
 0.0
 1
@@ -1031,16 +1042,6 @@ TEXTBOX
 1268
 525
 Conditional Strategies Observations
-20
-0.0
-1
-
-TEXTBOX
-1398
-322
-1599
-355
-Verification Testing
 20
 0.0
 1

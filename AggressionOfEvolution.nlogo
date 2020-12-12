@@ -584,10 +584,10 @@ NIL
 1
 
 BUTTON
-1400
-71
-1475
-104
+1398
+83
+1473
+116
 go once
 go
 NIL
@@ -641,7 +641,7 @@ initial-food-quantity
 initial-food-quantity
 0
 10000
-1529.0
+1911.0
 1
 1
 NIL
@@ -712,17 +712,17 @@ fight-lose-cost
 fight-lose-cost
 0
 1
-1.0
+0.75
 0.01
 1
 NIL
 HORIZONTAL
 
 BUTTON
-1496
-69
-1631
-102
+1494
+81
+1629
+114
 add aggressive pig
 add-aggresive-pig
 NIL
@@ -736,10 +736,10 @@ NIL
 0
 
 BUTTON
-1400
-118
-1497
-151
+1398
+130
+1495
+163
 add nice pig
 add-nice-pig
 NIL
@@ -824,7 +824,7 @@ decision-time-range
 decision-time-range
 0
 10
-5.0
+10.0
 1
 1
 NIL
@@ -861,9 +861,9 @@ histogram of aggression
 NIL
 NIL
 0.0
-2.0
+1.0
 0.0
-1000.0
+1.0
 true
 false
 "set-histogram-num-bars 10\nset-plot-y-range 0 count pigs" ""
@@ -934,10 +934,10 @@ different-behaviour
 -1000
 
 SWITCH
-1511
-116
-1642
-149
+1509
+128
+1640
+161
 debug-mode?
 debug-mode?
 1
@@ -957,9 +957,9 @@ Initialization setup
 TEXTBOX
 1391
 34
-1541
-59
-Debug Testing
+1592
+66
+Debug and Testing
 20
 0.0
 1
@@ -1035,16 +1035,6 @@ Conditional Strategies Observations
 0.0
 1
 
-TEXTBOX
-1398
-322
-1599
-355
-Verification Testing
-20
-0.0
-1
-
 MONITOR
 1134
 585
@@ -1063,6 +1053,17 @@ MONITOR
 630
 different behaviour pig count
 count pigs with [ behaviour = 1 ]
+0
+1
+11
+
+MONITOR
+1180
+113
+1297
+158
+current generation
+ticks / 4
 0
 1
 11
