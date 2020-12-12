@@ -9,7 +9,7 @@ globals [ CURRENT-ITERATION ]
 
 ; breed for pigs
 breed [ pigs pig ]
-pigs-own [ energy aggression intelligent decision-time behaviour ]
+pigs-own [ energy aggression intelligent decision-time behaviour age ]
 
 ; breed for food agents
 breed [ foods food ]
@@ -78,24 +78,26 @@ to setup-pigs
     ] [
       set aggression aggresive-level 0
     ]
+    set age 0
   ]
   if conditional-strategies[
-       let intelligentPigsCount initial-pigs-population * percentage-of-intelligent-agents * 0.01
-       let samebehaviourPigsCount intelligentPigsCount * percentage-of-same-behaviour-agents * 0.01
-       set index 0
-       ask pigs[
-          ifelse (index < intelligentPigsCount) [
-            ife (index < samebehaviourPigsCount) [
-              set behaviour 0
-            ]
-            set intelligent 1
-            set behaviour 1
-            set decision-time 1 + random decision-time-range
-            set index index + 1
-          ] [
-            set intelligent 0
-          ]
-       ]
+    let intelligentPigsCount initial-pigs-population * percentage-of-intelligent-agents * 0.01
+    let samebehaviourPigsCount intelligentPigsCount * percentage-of-same-behaviour-agents * 0.01
+    set index 0
+    ask pigs[
+      ifelse (index < intelligentPigsCount) [
+        ifelse (index < samebehaviourPigsCount) [
+          set behaviour 0
+        ] [
+          set behaviour 1
+        ]
+        set intelligent 1
+        set decision-time 1 + random decision-time-range
+        set index index + 1
+      ] [
+        set intelligent 0
+      ]
+    ]
   ]
 end
 
@@ -174,6 +176,7 @@ to go
   if CURRENT-ITERATION = 2 [
     if debug-mode? [ move-pigs-to-food ]
     eat-food
+    add-age
   ]
 
   ;; current-iteration = 3 => get back home and reproduce and end the day
@@ -264,6 +267,11 @@ to eat-food
       ]
     ]
   ]
+end
+
+;; adds age to all pigs
+to add-age
+  ask pigs [ set age age + 1 ]
 end
 
 ;;conflicts when conditional strategies
@@ -393,6 +401,9 @@ to check-death
     ;; dies with the probability of its energy
     if ((random-float 1) > energy) [ die ]
   ]
+
+  ;; dies of old age if age > 2
+  ;ask pigs with [ age > 2 ] [ die ]
 end
 
 ;; if pig has enough energy reproduce
@@ -412,6 +423,7 @@ end
 
 to reproduce
   hatch 1 [
+    set age 0
     set aggression aggresion-level-reproduction [aggression] of myself
     ifelse conditional-strategies [
       set intelligent [intelligent] of myself
@@ -489,6 +501,7 @@ to-report decision-time-for-pig [ pigWho ]
   ]
   report result
 end
+
 ;;returns aggressive level for pig
 to-report aggresive-level [ flag ]
   ifelse mixed-strategies[
@@ -527,10 +540,10 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; END OF UTILITY FUNCTIONS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @#$#@#$#@
 GRAPHICS-WINDOW
-359
-57
-877
-576
+344
+27
+862
+546
 -1
 -1
 15.455
@@ -636,9 +649,9 @@ HORIZONTAL
 
 MONITOR
 948
-76
+58
 1012
-121
+103
 pigs alive
 count pigs
 0
@@ -661,10 +674,10 @@ NIL
 HORIZONTAL
 
 PLOT
-946
-137
-1164
-306
+947
+112
+1165
+281
 aggresive vs nice
 NIL
 NIL
@@ -681,9 +694,9 @@ PENS
 
 MONITOR
 1039
-74
+56
 1135
-119
+101
 Nice pigs count
 count pigs with [aggression < 0.5]
 0
@@ -699,7 +712,7 @@ fight-lose-cost
 fight-lose-cost
 0
 1
-1.0
+0.5
 0.01
 1
 NIL
@@ -803,10 +816,10 @@ NIL
 HORIZONTAL
 
 SLIDER
-265
-603
-437
-636
+222
+602
+394
+635
 decision-time-range
 decision-time-range
 0
@@ -818,10 +831,10 @@ NIL
 HORIZONTAL
 
 MONITOR
-952
-596
-1080
-641
+941
+527
+1069
+572
 Intelligent Pigs count
 count pigs with [ intelligent = 1 ]
 17
@@ -829,10 +842,10 @@ count pigs with [ intelligent = 1 ]
 11
 
 MONITOR
-1090
-595
-1207
-640
+1079
+526
+1196
+571
 Non intelligent pigs
 count pigs with [ intelligent = 0 ]
 17
@@ -840,10 +853,10 @@ count pigs with [ intelligent = 0 ]
 11
 
 PLOT
-948
-368
-1148
-518
+946
+330
+1146
+480
 histogram of aggression
 NIL
 NIL
@@ -858,10 +871,10 @@ PENS
 "default" 1.0 1 -16777216 true "" "histogram [ aggression ] of pigs"
 
 PLOT
-1169
-652
-1369
-802
+1156
+644
+1356
+794
 histogram of decision-time
 NIL
 NIL
@@ -876,10 +889,10 @@ PENS
 "decission-time" 1.0 1 -5298144 true "" "histogram [ decision-time ] of pigs "
 
 PLOT
-954
-651
-1154
-801
+941
+643
+1141
+793
 intelligent vs non-intelligent
 NIL
 NIL
@@ -982,10 +995,10 @@ Conditional Stragegies Attributes
 1
 
 TEXTBOX
-946
-28
-1167
-60
+944
+24
+1165
+56
 General Observations
 20
 0.0
@@ -993,9 +1006,9 @@ General Observations
 
 MONITOR
 1159
-72
+54
 1293
-117
+99
 Aggressive pigs count
 count pigs with [aggression >= 0.5]
 0
@@ -1003,20 +1016,20 @@ count pigs with [aggression >= 0.5]
 11
 
 TEXTBOX
-942
-332
-1231
-364
+940
+294
+1229
+326
 Mixed Strategies Observations
 20
 0.0
 1
 
 TEXTBOX
-941
-563
-1279
-594
+930
+494
+1268
+525
 Conditional Strategies Observations
 20
 0.0
@@ -1031,6 +1044,28 @@ Verification Testing
 20
 0.0
 1
+
+MONITOR
+1134
+585
+1328
+630
+same behaviour pig count
+count pigs with [ behaviour = 0 ]
+0
+1
+11
+
+MONITOR
+942
+585
+1116
+630
+different behaviour pig count
+count pigs with [ behaviour = 1 ]
+0
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?
