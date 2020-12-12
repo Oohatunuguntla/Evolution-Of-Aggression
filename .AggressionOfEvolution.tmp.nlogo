@@ -753,10 +753,10 @@ NIL
 0
 
 SWITCH
-31
-419
-181
-452
+36
+483
+186
+516
 mixed-strategies
 mixed-strategies
 0
@@ -764,10 +764,10 @@ mixed-strategies
 -1000
 
 SLIDER
-29
-472
-201
-505
+36
+522
+208
+555
 change-in-heridity
 change-in-heridity
 0
@@ -975,10 +975,10 @@ General Attributes
 1
 
 TEXTBOX
-13
-378
-255
-407
+18
+442
+260
+471
 Mixed Strategies Attributes
 20
 0.0
@@ -1071,53 +1071,11 @@ ticks / 4
 @#$#@#$#@
 ## WHAT IS IT?
 
-(The purpose of this model is to simulate how evolution is affected by different aggression levels of behaviour of animals.If we consider individual animals,food intake can be explained by energy balance.But if we groups of animals,competition for food affects(social factors)  the behaviour of animals which in turn affect growth or evolution of animals.We think that physiological factors interact with social factors like competition for food and simulate feeding behaviour of animals and interaction between animals.This model simulates feeding patterns (e.g. feed intake), social interaction patterns (avoidance, interactions from the feeder)  during the growing period of animals. )
+(a general understanding of what the model is trying to show or explain)
 
 ## HOW IT WORKS
 
-### INITIAL SETUP
-
-Agents are generated and Food is randomly generated at one below the max offset from the centre.
--> If mixed strategies is ON, all the aggressive pigs get the aggression level between 0.5 to 1 and all the nice pigs get the aggression level between 0 to 0.5.
--> If conditional strategies is ON,then the number of pigs which is initialized in intelligent-pigs slider will get the intelligence value 1 and other pigs get intelligence value 0.
--> Out of the total number of intelligent agents, percentage-of-same-behaviour slider takes out the percentage of intelligent agents and considers them as the same behaviour (behaviour - 0) and all the remaining intelligent agents have different behaviour (behaviour - 1).
-->Decision time for intelligent pigs is given from the slider in a range of  0 to maximum by allotting randomly in the range.
-
-### AT EACH TIME STEP
--> Food is randomly generated at one below the max offset from the centre.
--> Reset agents energy to 1.
--> Agents start their hunt for food.
--> Agents eat food via sharing or fighting.
--> Based on the energy of the animal either reproduces or stays live or may die.
--> Energy is updated asynchronously as soon as the agents consume the food.
-##### EAT FOOD CONDITIONS
--> Move to the selected food.
--> Eat the food by resolving conflicts.
-```
-If there is only one agent near a pair of food:
-	Agent eats the pair of food 
-   elif there are 2 agents near a pair of food:
-	If both agents are of nice:
-		Agents share food among themselves and each gets an equal part of food.
-	elif one agent is nice and other is aggressive:
-		Agent with aggressive nature gets 3/2 th of food and with nice nature gets ½ th of food.
-	Elif both agents are of aggressive:
-		Both fight long for food and each takes sample of food and gets energy but due to long duration of fight,both animals suffer energy loss.
-```
-
--> If mixed-strategies with different level of aggression is ON, based on aggression level input,that input is taken as the probability of aggression and that is assigned for every pig.
-
--> If conditional-strategies is ON,for every two pigs it checks if any one of them is intelligent or not. If none of them is intelligent,it again performs mixed-strategies conditions. If one of them is intelligent,first an initial aggression-level is assigned for both pigs and then based on the behaviour of the other pig, if it is 0,then it performs same-behavior strategy else it performs opposite behaviour that of other pigs.If both pigs are intelligent,then decision-time is used.The pig with less decision-time gets to decide first based on its initial aggression level.If both pigs are intelligent and both of them has same decision time,they again fall under the category of mixed strategies and those conditions are performed.
-
-
-
-### REPRODUCTION
--> If agent has energy = 2 it reproduces
--> If an agent has energy = 1.5 it reproduces with 50% probability.
--> The aggression level and decision time of the child varies from the parent.
--> The aggression level changes as the increase or decrease by the fixed value initialized in the change-in heredity slider.The decision time changes as +1or -1 of the present time of the parent 
-
-
+(what rules the agents use to create the overall behavior of the model)
 
 ## HOW TO USE IT
 
