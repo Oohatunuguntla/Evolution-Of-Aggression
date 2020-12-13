@@ -66,7 +66,7 @@ to setup-pigs
   let aggressivePigsCount initial-pigs-population * percentage-of-aggressive-agents * 0.01
   let index 0
   create-pigs initial-pigs-population [
-    set intelligent -1
+    set intelligent 0
     set decision-time 0
     set behaviour -1
     set color pink
@@ -82,7 +82,15 @@ to setup-pigs
   ]
   if conditional-strategies[
     let intelligentPigsCount initial-pigs-population * percentage-of-intelligent-agents * 0.01
-    let samebehaviourPigsCount intelligentPigsCount * percentage-of-same-behaviour-agents * 0.01
+    let samebehaviourPigsCount intelligentPigsCount
+    ifelse same-behaviour and different-behaviour
+    [
+      set samebehaviourPigsCount intelligentPigsCount * percentage-of-same-behaviour-agents * 0.01
+    ]
+    [
+      if same-behaviour [ set samebehaviourPigsCount intelligentPigsCount ]
+      if different-behaviour [ set samebehaviourPigsCount 0 ]
+    ]
     set index 0
     ask pigs[
       ifelse (index < intelligentPigsCount) [
@@ -362,7 +370,7 @@ end
 
 ;;selecting bhaviour
 to behaviour-strategy [ pig1Who pig2Who ]
-  let Pigbehaviour [behaviour] of pig2who
+  let Pigbehaviour [behaviour] of pig pig2who
   ifelse (Pigbehaviour = 0)
     [same-behaviour-strategy pig1Who pig2Who ]
     [different-behaviour-strategy pig1Who pig2Who]
@@ -626,7 +634,7 @@ initial-pigs-population
 initial-pigs-population
 0
 100
-38.0
+100.0
 1
 1
 NIL
@@ -641,7 +649,7 @@ initial-food-quantity
 initial-food-quantity
 0
 10000
-1911.0
+2165.0
 1
 1
 NIL
@@ -674,10 +682,10 @@ NIL
 HORIZONTAL
 
 PLOT
-947
-112
+948
+115
 1165
-281
+275
 aggresive vs nice
 NIL
 NIL
@@ -689,8 +697,8 @@ true
 false
 "" ""
 PENS
-"Aggresice pigs" 1.0 0 -2674135 true "" "plot count pigs with [ aggression > 0.5]"
-"Nice pigs" 1.0 0 -13791810 true "" "plot count pigs with [ aggression < 0.5 ]"
+"Aggresive pigs" 1.0 0 -2674135 true "" "plot count pigs with [ aggression > 0.5 and intelligent = 0]"
+"Nice pigs" 1.0 0 -13791810 true "" "plot count pigs with [ aggression < 0.5 and intelligent = 0 ]"
 
 MONITOR
 1039
@@ -712,7 +720,7 @@ fight-lose-cost
 fight-lose-cost
 0
 1
-0.75
+1.0
 0.01
 1
 NIL
@@ -753,10 +761,10 @@ NIL
 0
 
 SWITCH
-36
-483
-186
-516
+31
+419
+181
+452
 mixed-strategies
 mixed-strategies
 0
@@ -764,10 +772,10 @@ mixed-strategies
 -1000
 
 SLIDER
-36
-522
-208
-555
+29
+472
+201
+505
 change-in-heridity
 change-in-heridity
 0
@@ -785,7 +793,7 @@ SWITCH
 636
 conditional-strategies
 conditional-strategies
-1
+0
 1
 -1000
 
@@ -796,7 +804,7 @@ SWITCH
 724
 same-behaviour
 same-behaviour
-1
+0
 1
 -1000
 
@@ -809,22 +817,22 @@ percentage-of-intelligent-agents
 percentage-of-intelligent-agents
 0
 100
-26.0
+50.0
 1
 1
 NIL
 HORIZONTAL
 
 SLIDER
-222
-602
-394
-635
+274
+647
+446
+680
 decision-time-range
 decision-time-range
 0
 10
-10.0
+6.0
 1
 1
 NIL
@@ -889,10 +897,10 @@ PENS
 "decission-time" 1.0 1 -5298144 true "" "histogram [ decision-time ] of pigs "
 
 PLOT
-941
-643
-1141
-793
+1382
+586
+1644
+794
 intelligent vs non-intelligent
 NIL
 NIL
@@ -901,11 +909,11 @@ NIL
 0.0
 10.0
 true
-false
+true
 "" ""
 PENS
-"intelligent" 1.0 0 -2674135 true "" "plot count pigs with [ intelligent = 1 ]"
-"non-intelligent" 1.0 0 -13345367 true "" "plot count pigs with [ intelligent = 0 ]"
+"intelligent" 1.0 0 -817084 true "" "plot count pigs with [ intelligent = 1 ]"
+"non-intelligent" 1.0 0 -16113878 true "" "plot count pigs with [ intelligent = 0 ]"
 
 SLIDER
 218
@@ -929,7 +937,7 @@ SWITCH
 772
 different-behaviour
 different-behaviour
-1
+0
 1
 -1000
 
@@ -975,10 +983,10 @@ General Attributes
 1
 
 TEXTBOX
-18
-442
-260
-471
+13
+378
+255
+407
 Mixed Strategies Attributes
 20
 0.0
@@ -989,7 +997,7 @@ TEXTBOX
 556
 335
 587
-Conditional Stragegies Attributes
+Conditional Strategies Attributes
 20
 0.0
 1
@@ -1068,38 +1076,146 @@ ticks / 4
 1
 11
 
+PLOT
+633
+582
+928
+794
+Same behaviour vs Different behaviour
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+true
+"" ""
+PENS
+"Same-behaviour" 1.0 0 -10899396 true "" "plot count pigs with [ behaviour = 0 ]"
+"Different-behaviour" 1.0 0 -4699768 true "" "plot count pigs with [ behaviour = 1 ]"
+
 @#$#@#$#@
+# EVOLUTION OF AGGRESSION
+
 ## WHAT IS IT?
 
-(a general understanding of what the model is trying to show or explain)
+The purpose of this model is to simulate how evolution is affected by different aggression levels of behaviour of animals. If we consider individual animals, food intake can be explained by energy balance. But if we groups of animals, competition for food affects(social factors) the behaviour of animals which in turn affect growth or evolution of animals. We think that physiological factors interact with social factors like competition for food and simulate feeding behaviour of animals and interaction between animals. This model simulates feeding patterns (e.g. feed intake), social interaction patterns (avoidance, interactions from the feeder)  during the growing period of animals. 
 
 ## HOW IT WORKS
 
-(what rules the agents use to create the overall behavior of the model)
+### INITIAL SETUP
 
-## HOW TO USE IT
+* Agents are generated and Food is randomly generated at one below the max offset from the centre.
+* If mixed strategies is ON, all the aggressive pigs get the aggression level between 0.5 to 1 and all the nice pigs get the aggression level between 0 to 0.5.
+* If conditional strategies is ON, then the number of pigs which is initialized in intelligent-pigs slider will get the intelligence value 1 and other pigs get intelligence value 0.
+* Out of the total number of intelligent agents, percentage-of-same-behaviour slider takes out the percentage of intelligent agents and considers them as the same behaviour (behaviour - 0) and all the remaining intelligent agents have different behaviour (behaviour - 1).
+* Decision time for intelligent pigs is given from the slider in a range of  0 to maximum by allotting randomly in the range.
 
-(how to use the model, including a description of each of the items in the Interface tab)
+### AT EVERY FOUR TIME STEPS
+* Food is randomly generated at one below the max offset from the centre.
+* Reset agents energy to 1.
+* Agents start their hunt for food.
+* Agents eat food via sharing or fighting.
+* Based on the energy of the animal either reproduces or stays live or may die.
 
-## THINGS TO NOTICE
+### EAT FOOD CONDITIONS
+* Move to the selected food.
+* Eat the food by resolving conflicts.
+```
+If there is only one agent near a pair of food:
+	Agent eats the pair of food 
+   elif there are 2 agents near a pair of food:
+	If both agents are of nice:
+		Agents share food among themselves and each gets an equal part of food.
+	elif one agent is nice and other is aggressive:
+		Agent with aggressive nature gets 3/2 th of food and with nice nature gets ½ th of food.
+	Elif both agents are of aggressive:
+		Both fight long for food and each takes sample of food and gets energy but due to long duration of fight, both animals suffer energy loss.
+```
 
-(suggested things for the user to notice while running the model)
+* If mixed-strategies with different level of aggression is ON, based on aggression level input,that input is taken as the probability of aggression and that is assigned for every pig.
 
-## THINGS TO TRY
+* If conditional-strategies is ON,for every two pigs it checks if any one of them is intelligent or not. If none of them is intelligent,it again performs mixed-strategies conditions. If one of them is intelligent,first an initial aggression-level is assigned for both pigs and then based on the behaviour of the other pig, if it is 0,then it performs same-behavior strategy else it performs opposite behaviour that of other pigs.If both pigs are intelligent, then decision-time is used. The pig with less decision-time gets to decide first based on its initial aggression level.If both pigs are intelligent and both of them has same decision time, they again fall under the category of mixed strategies and those conditions are performed.
 
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
 
-## EXTENDING THE MODEL
+### REPRODUCTION
+* If agent has energy = 2 it reproduces
+* If an agent has energy = 1.5 it reproduces with 50% probability.
+* The aggression level and decision time of the child varies from the parent.
+* The aggression level changes as the increase or decrease by the fixed value initialized in the change-in heredity slider.The decision time changes as +1 or -1 of the present time of the parent 
 
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
+# OBSERVATIONS
+## NO MIXED OR CONDITIONAL STRATEGIES
 
-## NETLOGO FEATURES
+### ON EACH RUN PIGS DO
+* Move to the selected food.
+* Eat the food by resolving conflicts.
+* Conflicts resovling algorithm is as follows:
+```
+If there is only one agent near a pair of food:
+	Agent eats the pair of food 
+   elif there are 2 agents near a pair of food:
+	If both agents are of nice:
+		Agents share food among themselves and each gets an equal part of food.
+	elif one agent is nice and other is aggressive:
+		Agent with aggressive nature gets 3/2 th of food and with nice nature gets ½ th of food.
+	Elif both agents are of aggressive:
+		Both fight long for food and each takes sample of food and gets energy but due to long duration of fight, both animals suffer energy loss.
+```
+* The energy lost because of fighting is a slider in named **_fight_lose_cost_**.
+* The equilibrium (also known as stable condition) condition occurs when the average energy of aggresive pigs and that of nice pigs is same.
+* Using probabilities, and generalisation we can find the average score of both pigs in the form a linear equation.
+* The queations are:
 
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
+![Formula](file:images/formula.png)
 
-## RELATED MODELS
+### By speculating the formula graphs and simulation data graphs we get the below data:
 
-(models in the NetLogo Models Library and elsewhere which are of related interest)
+### For Fight_lose_cost 1 (all of the erngy gained by eating food is lost in fighting)
+![pic1](file:images/fight_loss_1.0_graph.png)![pic1](file:images/fight_loss_1.0_plot.png)
+
+### For Fight_lose_cost 0.75 
+![pic1](file:images/fight_loss_0.75_graph.png)![pic1](file:images/fight_loss_0.75_plot.png)
+
+### For Fight_lose_cost 0.5
+![pic1](file:images/fight_loss_0.5_graph.png)![pic1](file:images/fight_loss_0.5_plot.png)
+
+### For Fight_lose_cost 0.4 
+![pic1](file:images/fight_loss_0.4_graph.png)![pic1](file:images/fight_loss_0.4_plot.png)
+
+## MIXED STRATEGIES
+
+### WITH MIXED TURN ON
+* The pig response in the case of conflict is determined by its aggression-level but this aggression level is no longer a integer but a float which determines the probability of that pig acting as a aggressive.
+
+### For Fight_lose_cost 1 (all of the erngy gained by eating food is lost in fighting)
+![pic1](file:images/m_strat_1.0_aggressive_vs_nice.png)![pic1](file:images/m_strat_1.0_hist_agg.png)
+
+### For Fight_lost_cost 0.75
+![pic1](file:images/m_strat_0.75_aggressive_vs_nice.png)![pic1](file:images/m_strat_0.75_hist_agg.png)
+
+### For Fight_lost_cost 0.5
+![pic1](file:images/m_strat_0.5_aggressive_vs_nice.png)![pic1](file:images/m_strat_0.5_hist_agg.png)
+
+### For Fight_lost_cost 0.3
+![pic1](file:images/m_strat_0.3_aggressive_vs_nice.png)![pic1](file:images/m_strat_0.3_hist_agg.png)
+
+#### Observations from MIXED STRATEGIES
+* When the fight cost is too high then the low level aggressive pigs seems to sustain more easier.
+
+## CONDITIONAL STRATEGIES
+### ONLY SAME BEHAVIOUR
+* We observe the graphs like:-
+![pic1](file:images/Conditional/same_only_1.0.png)![pic1](file:images/Conditional/same_only_1.0_vs.png)
+
+### ONLY DIFFERENT BEHAVIOUR
+* We observe the graphs like:-
+![pic1](file:images/Conditional/diff_only_1.0.png)![pic1](file:images/Conditional/diff_only_1.0_vs.png)
+
+### BOTH BEHAVIOURS
+* We observe the graphs like:-
+![pic1](file:images/Conditional/same&diff_1.0.png)![pic1](file:images/Conditional/same&diff_1.0_vs.png)
 
 ## CREDITS AND REFERENCES
 
