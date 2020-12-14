@@ -634,7 +634,7 @@ initial-pigs-population
 initial-pigs-population
 0
 100
-100.0
+41.0
 1
 1
 NIL
@@ -767,7 +767,7 @@ SWITCH
 452
 mixed-strategies
 mixed-strategies
-0
+1
 1
 -1000
 
@@ -793,7 +793,7 @@ SWITCH
 636
 conditional-strategies
 conditional-strategies
-0
+1
 1
 -1000
 
@@ -804,7 +804,7 @@ SWITCH
 724
 same-behaviour
 same-behaviour
-0
+1
 1
 -1000
 
@@ -937,7 +937,7 @@ SWITCH
 772
 different-behaviour
 different-behaviour
-0
+1
 1
 -1000
 
@@ -948,7 +948,7 @@ SWITCH
 161
 debug-mode?
 debug-mode?
-1
+0
 1
 -1000
 
@@ -1219,7 +1219,8 @@ If there is only one agent near a pair of food:
 
 ## CREDITS AND REFERENCES
 
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+* [Pig behaviour and related sustainability performance in novel farm designs: an agent-based approach](link.address.here) - project
+* [A model on feeding and social interaction behaviour of pigs](https://www.comses.net/codebases/5628/releases/1.0.0/) Iris J.M.M. Boumans (2017, May 04). “A model on feeding and social interaction behaviour of pigs” (Version 1.0.0). CoMSES Computational Model Library
 @#$#@#$#@
 default
 true
